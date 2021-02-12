@@ -45,7 +45,6 @@ df <-df[!(education_level) %like% “Primary School”]
 #Drop missing values for education level
 df[df$education_level == ‘’] = NA
 
-<<<<<<< HEAD
 #Drop missing values for major discipline 
 df[df$major_discipline == ‘’] = NA
 
@@ -77,9 +76,3 @@ c
 unique(df[c(“company_type”)])
 ct <- na.omit(df, cols=c(“company_type”))
 sum(is.na(md))
-=======
-table(df$last_new_job)
-
-
-
->>>>>>> d28dd41d59d350516e1763cd4077ade0d3a0cf7c
