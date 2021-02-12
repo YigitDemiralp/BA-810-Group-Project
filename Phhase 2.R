@@ -17,3 +17,6 @@ unique(df['last_new_job'])
 df[which((df$company_type == 'Early Stage Startup') & (df$company_size == '10/49'))]
 
 table(df$last_new_job)
+
+
+
