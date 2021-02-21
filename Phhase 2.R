@@ -86,12 +86,10 @@ sum(is.na(df))
 str(df)
 
 
-plot_normality(df, training_hours, target)
+
+correlate(df)
 plot_correlate(df)
 
-categ <- target_by(df, target)
-
-cat_cat <- target_by(categ, major_discipline)
 
 
 
