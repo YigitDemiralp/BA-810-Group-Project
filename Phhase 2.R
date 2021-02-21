@@ -4,8 +4,9 @@ library(ggplot2)
 library(ggthemes)
 library(glmnet)
 library(tidyr)
+library(corrplot)
+library(RColorBrewer)
 library(dplyr)
-library(dlookr)
 theme_set(theme_bw())
 
 ## Loading the data
@@ -87,8 +88,9 @@ str(df)
 
 
 
-correlate(df)
-plot_correlate(df)
+M <-cor(select(df, city_development_index, target, training_hours))
+corrplot(M, type="upper", order="hclust",
+         col=brewer.pal(n=8, name="RdYlBu"))
 
 
 
