@@ -1,10 +1,10 @@
 ---
 title: "HR Analytics: Prediction of Candidates Who Stay/Leave the Company and the City Development Index"
-author: "Team 3: Xinping Yu, Ruchika Venkateswaran, Yigit, Bosoo, Muyan"
-date: "2/22/2021"
+author: "Team 3: Xinping Yu, Ruchika Venkateswaran, Yigit Demiralp, Bosoo Kim, Muyan Xie"
+date: "3/1/2021"
 output:
-  pdf_document: default
   html_document: default
+  pdf_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -18,31 +18,36 @@ The dataset chosen by our group will be used in the field of "Human Resource Ana
 
 ## Impact of the Predictions
 Enhanced candidate experience
-* Better match of job seekers to roles
-* More informative pre-hire communication
+
+- Better match of job seekers to roles
+- More informative pre-hire communication
 
 Efficient and effective recruitment
-* Better prioritization of job requisitions
-* Accelerated time-to-hire
-* Identification of the most qualified candidates
-* Minimizing the impact of employee turnover
+
+- Better prioritization of job requisitions
+- Accelerated time-to-hire
+- Identification of the most qualified candidates
+- Minimizing the impact of employee turnover
 
 ## Description of the Dataset
-Our dataset has 19,158 observations and 14 features and approximately 8% of the dataset consists of missing values. The features of our dataset have been listed below:
-* enrollee_id : Unique ID for candidate
-* city: City code
-* city_ development _index : Development index of the city (scaled)
-* gender: Gender
-* relevent_experience: Relevant experience of candidate
-* enrolled_university: Type of University course enrolled if any
-* education_level: Education level of candidate
-* major_discipline :Education major discipline of candidate
-* experience: Candidate total experience in years
-* company_size: No of employees in current employer's company
-* company_type : Type of current employer
-* Last new job: Difference in years between previous job and current job
-* training_hours: training hours completed
-* target: 0 - Not looking for job change, 1 - Looking for a job change
+Our dataset has 19,158 observations and 14 features and approximately 8% of the dataset consists of missing values. The features of our dataset have been listed below
+
+- enrollee_id : Unique ID for candidate
+- city: City code
+- city_ development _index : Development index of the city (scaled)
+- gender: Gender
+- relevent_experience: Relevant experience of candidate
+- enrolled_university: Type of University course enrolled if any
+- education_level: Education level of candidate
+- major_discipline :Education major discipline of candidate
+- experience: Candidate total experience in years
+- company_size: No of employees in current employer's company
+- company_type : Type of current employer
+- Last new job: Difference in years between previous job and current job
+- training_hours: training hours completed
+- target: 0 - Not looking for job change, 1 - Looking for a job change
+
+*** 
 
 ## Loading the Data
 ```{r}
@@ -84,6 +89,7 @@ df <- fread("C:/Users/ruchi/OneDrive/Documents/Ruchika/Boston University/BA810/T
 df <- as.data.table(df)
 ```
 
+
 ```{r}
 #viewing the head of dataset
 head(df)
@@ -94,6 +100,8 @@ str(df)
 #summary to view data types and missing values 
 summary(df)
 ```
+
+*** 
 
 ## Data Cleaning
 
@@ -233,6 +241,7 @@ Before dropping NA values, we change NA values under "enrolled_university" to "n
 #### Dropping Null Values
 After cleaning and imputing missing values, our final step was to drop the remaining NA values under the features "company_size", "enrolled_id", "city", "education_level", and "major_discipline".
 
+*** 
 
 ## Exploratory Data Analysis
 
@@ -261,19 +270,6 @@ ggplot(data = df, mapping = aes(x = city_development_index)) +
   xlab("City development index")
 ```
 
-```{r}
- ggplot(df, aes(x = `city_development_index`, y = `education_level`, fill = ..x..)) +
-   geom_density_ridges_gradient(scale = 3, rel_min_height = 0.01) +
-  scale_fill_viridis(name = 'City_development_index', option = 'C') +
-   labs(title = 'Education level by City index') +
-   theme_ipsum() +
-     theme(
-       legend.position='none',
-       panel.spacing = unit(0.1, 'lines'),
-       strip.text.x = element_text(size = 8)
-     )
-
-```
  
 ```{r}
    ggplot(df, aes(y=company_type, x=city_development_index,  fill=company_type)) +
@@ -427,8 +423,9 @@ ggplot(df, aes(x=training_hours, fill=gender)) + geom_density(alpha=.3)+ ggtitle
 #examining outliers 
 ggplot(df, aes(x=gender, y=training_hours, fill=gender)) + geom_boxplot() + ggtitle('Distribution of Training Hours by Gender') + ylab('Training Hours') + xlab('Gender')
 ```
+*** 
 
-## Machine Learning 
+## Machine Learning (Model Building)
 
 ## Classification Models to Predict Whether Candidates Will Stay or Leave the Company 
 ```{r}
@@ -670,6 +667,7 @@ The values of lambda and R-squares are very small (lambda is close to zero). Sin
 * Lasso: Lambda (0e+00), R^2(0.1299193)
 * Ridge: Lambda (0.1), R^2(0.1102777)
 
+*** 
 
 ## Recommendations and Conclusion
 
