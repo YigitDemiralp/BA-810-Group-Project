@@ -14,7 +14,7 @@ knitr::opts_chunk$set(echo = TRUE)
 # BA810 Team Project
 
 ## Introduction and Motivation
-The dataset chosen by our group will be used in the field of "Human Resource Analytics".Our primary goal is to utilize the dataset to predict whether a candidate training for a data science position will stay or leave the current company post receiving training. The dataset has been compiled by a data-related company that is aiming to reduce the time and cost spent by the human resources division to rain candidates who are potential full time employees. In addition, we will also discuss how these factors impact a candidate's decision to stay and which is the most significant factor. We will also be using the most important features to predict the city development index. Generally, cities that are more developed provide a fertile ground for the development of science, technology, culture, and innovation. The prediction of the city development index can provide HR teams with deeper insight on whether they should train candidates who belong to cities with higher development indexes. 
+The dataset chosen by our group will be used in the field of "Human Resource Analytics".Our primary goal is to utilize the dataset to predict whether a candidate training for a data science position will accept or reject a full time offer from the company. The dataset has been compiled by a data-related company that is aiming to reduce the time and cost spent by the human resources division to rain candidates who are potential full time employees. In addition, we will also discuss how these factors impact a candidate's decision to stay and which is the most significant factor. We will also be using the most important features to predict the city development index. Generally, cities that are more developed provide a fertile ground for the development of science, technology, culture, and innovation. The prediction of the city development index can provide HR teams with deeper insight on whether they should train candidates who belong to cities with higher development indexes. 
 
 ## Impact of the Predictions
 Enhanced candidate experience
@@ -158,6 +158,16 @@ df$company_size[df$company_size == '<10'] <- '0-9'
 ```
 
 ```{r}
+#Changing 'graduate' to 'undergraduate' since we already have data for Masters candidates 
+df$education_level[df$education_level == 'Graduate'] <- 'Undergraduate'
+```
+
+
+```{r}
+df$education_level = factor(df$education_level, levels=c('Undergraduate', 'Masters', 'Phd'))
+```
+
+```{r}
 #Experience for more than 20 becomes 21                                        
 levels(df$experience) <- c(levels(df$experience), '21')
 df$experience[df$experience == '>20'] <- '21'
@@ -259,7 +269,7 @@ ggplot(df, aes(x=training_hours)) +
 
 ### City Development Index
 
-The charts below displays that candidates looking for job change belong to cities with lower development indexes. Candidates might be willing to leave the company after training in order to elocate to a different city that is more developed with greater scope for technological innovations. 
+The charts below displays that candidates looking for job change belong to cities with lower development indexes. Candidates who belong to more developed cities are more likely to reject the job offer.
 
 ```{r}
 #discuss city development index, No change job(0,blue) vs will change job(1,black)
@@ -298,7 +308,7 @@ The dataset consists of more number of students with graduate degrees, as compar
 # count how many people in different education level where target equal to 1
 phd <- df[df$education_level == 'Phd' & df$target == 1, .N ]
 mas <- df[df$education_level == 'Masters' & df$target == 1, .N]
-gra <- df[df$education_level == 'Graduate' & df$target == 1, .N]
+gra <- df[df$education_level == 'Undergraduate' & df$target == 1, .N]
 # the percentage of people in different education level where target equal to 1
 all_target <- df[df$target == 1, .N]
 phd_p <- phd/all_target
@@ -347,29 +357,29 @@ g + geom_violin(fill="tomato3") +
 ```{r}
 #defining new df 'hp' for plotting
 hp <- ggplot(df, aes(x=experience)) + geom_histogram(binwidth=2,colour="white", fill="tomato3")
-hp + facet_grid(gender ~ education_level) + ggtitle('Experience by Gender and Graduate Level') + ylab('Number of Candidates') + xlab('Experience')
-hp + facet_grid(education_level ~ enrolled_university)+ ggtitle('Experience by University and Graduate Level') + ylab('Number of Candidates') + xlab('Experience')
+hp + facet_grid(gender ~ education_level, scales="free") + ggtitle('Experience by Gender and Graduate Level') + ylab('Number of Candidates') + xlab('Experience')
+hp + facet_grid(education_level ~ enrolled_university, scales="free")+ ggtitle('Experience by University and Education Level') + ylab('Number of Candidates') + xlab('Experience')
 ```
 
 ```{r}
 #examining outliers 
-ggplot(df, aes(x=relevent_experience, y=last_new_job, fill=enrolled_university)) + geom_boxplot()+ ggtitle('Distribution of Last New Job by Experience and University Enrollment') + ylab('Last New Job') + xlab('Relevant Experience')
+ggplot(df, aes(x=relevent_experience, y=last_new_job, fill=education_level)) + geom_boxplot()+ ggtitle('Distribution of Last New Job by Experience and University Enrollment') + ylab('Last New Job') + xlab('Relevant Experience')
 ```
 
 
 ### Work Experience, Company Type and Gender
 The dataset has more number of males and this could be attributed to the fact that the company has not yet collected much data on candidates belonging to other genders.The dataset also consists of more number of candidates belonging to private companies with the size ranging from 50-99 employees. Interestingly, some candidates across across all genders have received training upto 300 hours. 
 ```{r}
-#gender count by last new job
+# gender count
 ggplot(data = df) +
-  geom_bar(mapping = aes(x = gender, fill = last_new_job), position = "dodge", fill="tomato3") + ggtitle('Gender count by last new job') + ylab('Number of Candidates') + xlab('Gender')
+  stat_count(mapping = aes(x = gender), fill="tomato3")+ ggtitle('Number of Candidates by gender') + ylab('Number of Candidates') + xlab('Gender')
 ```
 
 ```{r}
 #gender count by company type
 ggplot(data = df) + geom_bar(mapping = aes(x = company_type, fill = gender)) + ggtitle('Number of Candidates in Each Company Type by Gender') + ylab('Number of Candidates') + xlab('Company Type')
 ```
-
+Most of
 ```{r}
 df %>% 
   group_by(company_size) %>% 
@@ -405,12 +415,6 @@ ggplot(data = df) +
   xlab("No change job vs will change job")
 ```
 
-
-```{r}
-# gender count
-ggplot(data = df) +
-  stat_count(mapping = aes(x = gender), fill="tomato3")+ ggtitle('Number of Candidates by gender') + ylab('Number of Candidates') + xlab('Gender')
-```
 
 ```{r}
 # density plot for training hours by gender
@@ -497,7 +501,7 @@ varImpPlot(model_rf,
            n.var = 5,
            main = "Top 5 - Variable Importance")
 ```
-Based on the variable importance plot of our random forest model, we can observe that city development index, experience, and last new job are the most important features in predicting if a candidate will continue with a company. 
+Based on the variable importance plot of our random forest model, we can observe that city development index, experience, and last new job are the most important features in predicting if a candidate will accept the job offer. 
 
 ```{r}
 importance_frame <- measure_importance(model_rf)
@@ -521,7 +525,7 @@ text(model_rpart, use.n=TRUE)
 rpart.plot(model_rpart, type = 1)
 ```
 
-We can see from this overly simplified decision tree above that city development index, experience, and training hours are the top 3 variables that are important in predicting if a candidate will continue with our company or not.
+We can see from this overly simplified decision tree above that city development index, experience, and training hours are the top 3 variables that are important in predicting if a candidate will accept the job offer.
 
 ### Gradient Boost Model
 ```{r}
@@ -540,7 +544,7 @@ pred_gbm <- predict.gbm(fit.btree, test_df, n.trees = 100, type = 'response')
 relative.influence(fit.btree)
 ```
 
-The gradient boost model also identifies city development index as the top feature in predicting whether a candidate will stay or leave a company. Additional features that are important no university enrollment, experience, training hours, and last new job are most important.
+The gradient boost model also identifies city development index as the top feature in predicting whether a candidate will accept or reject the job offer. Additional features that are important no university enrollment, experience, training hours, and last new job are most important.
 
 
 ```{r}
@@ -567,7 +571,15 @@ model_dt <- train(target ~., data = train_df,
 print(model_dt)
 varImp(model_dt)
 ```
-We also ran a logistic regression to identify most important features. Apart from city development index, experience, last new job and training hours, additional features identified as important predictors include company size (10,000, 10-49 and 1000-4999), candidates who enrolled in part time courses and those who did not enroll in university. Interestingly, Masters level and graduate level students have not been listed above and only the feature on PhD level candidates has been listed as an important feature. 
+We also ran a logistic regression to identify most important features. Apart from city development index, experience, last new job and training hours, additional features identified as important predictors include company size (10,000, 10-49 and 1000-4999), candidates who enrolled in part time courses and those who did not enroll in university. Interestingly, Masters level and undergraduate level students have not been listed above and only the feature on PhD level candidates has been listed as an important feature. 
+
+
+```{r}
+logistic_labels <- predict(model_dt, test_df)
+cm = confusionMatrix(test_df$target, as.factor(logistic_labels), positive = "1")
+print(cm)
+```
+
 
 
 ## Regression Models to Predict City Development Index 
@@ -604,6 +616,9 @@ mse_test.lm
 
 ## Ridge Regression
 ```{r}
+#set seed for reproducibality
+set.seed(1)
+
 # creating the train control function for cross validation creating 5 folds. The same 5 folds will be used for Ridge and Lasso regression
 train_control <- trainControl(method = "cv",
                               number = 5)
@@ -631,6 +646,9 @@ mse_test.ridge
 
 ## Lasso Regression
 ```{r}
+#set seed for reproducibality
+set.seed(1)
+
 model_lasso <- train(city_development_index ~., data = train_df_th,  
                method = "lasso", 
                trControl = train_control) 
@@ -669,19 +687,40 @@ The values of lambda and R-squares are very small (lambda is close to zero). Sin
 
 *** 
 
-## Recommendations and Conclusion
+## Conclusion
 
 ### Chosen Model for Predicting Whether Candidates Will Stay or Leave the Company (Classification)
-The criteria for us to make the choice of the model depends on multiple aspects of the result. In the evaluation process, we considered not only the accuracy, but also the sensitivity, specificity, and balanced accuracy. Finally, we picked the Gradient boosting model as it is the best model with highest accuracy. All the models we have run including decision tree, random forest, and Gradient boost have close accuracy (all around 86 percent). We next try to compare the sensitivity and specificity and find that the Gradient boosting model has better sensitivity as compared to the remaining 3 models. Our test dataset has 1795 observations, with a 90% accuracy of prediction of the target value 0, i.e. prediction of candidates not looking for any job change. The Gradient boosting model shows its advantage on sensitivity (57 percent) which means it has fewer false negative predictions. It has predicted more correct values of candidates looking for job change (158 over 275) as compared to other models and therefore, we have picked the Gradient boosting model.
+The criteria for us to make the choice of the model depends on multiple aspects of the result. In the evaluation process, we considered not only the accuracy, but also the sensitivity, specificity, and balanced accuracy. Finally, we picked the Gradient boosting model as it is the best model with highest accuracy. All the models we have run including decision tree, random forest, and Gradient boost have close accuracy (all around 86 percent). We next try to compare the sensitivity and specificity and find that the Gradient boosting model has better sensitivity as compared to the remaining 3 models. Our test dataset has 1795 observations, with a 90% accuracy of prediction of the target value 0, i.e. prediction of candidates not looking for any job change. The Gradient boosting model shows its advantage on sensitivity (57 percent) which means it has fewer false negative predictions. It has predicted more correct values of candidates looking for job change (158 over 275) as compared to other models and therefore, we have picked the Gradient boost model.
 
-The variable importance and tree plots display that city development index is the most important feature across all models in predicting whether candidates will stay/leave a company. Following is the experience. This implies that companies should also consider the city development index when predicting whether candidates will stay or leave the company. In our exploratory data analysis, we noticed that candidates belonging to more developed cities tend to stay in their current jobs. Therefore, we find that it would be relevant to also use the most important variables to predict the city development index, which would help companies in guaging how much to invest in their employees. A higher development index and higher levels of work experience indicates that candidates will tend to stay in the current company. This also helps companies to make the prediction for the cost of human force in the future.
+The variable importance and tree plots display that city development index is the most important feature across all models in predicting whether candidates will accept or reject the job, followed by years of experience. This implies that companies should also consider the city development index when predicting whether candidates will stay or leave the company. In our exploratory data analysis, we noticed that candidates belonging to more developed cities tend to reject job offers. Therefore, we find that it would be relevant to also use the most important variables to predict the city development index, which would help companies in guaging how much to invest in their employees. A higher development index and higher levels of work experience indicates that candidates will tend to reject the offer. This also helps companies to make the prediction for the cost of human force in the future.
 
 ### Chosen Model for Predicting the City Development Index (Regression)
-After we run three classification models, we find out that "city_development_index" has the highest impact on our target variable. Which means that a candidate with a high "city_development_index" value would be more likely to stay the company.
+After we run three classification models, we find out that "city_development_index" has the highest impact on our target variable. Which means that a candidate with a high "city_development_index" value would be more likely to reject the offer.
 
 We pick the best model on three values which are MSE/RMSE, MAE, and R^2. After fitting test data into Lasso, Ridge and Linear regression models, we pick linear regression as the best model. Linear regression gives us MSE with 0.01170526 which is the lowest and small MSE indicates a better model on unseen data. The residual standard error is 0.1085 and the R^2 is 0.1304 which is the highest. R^2 was based on correlation between actual and predicted value, as the value near 1 which indicates a better model. Also, MSE for both train and test are very close for Linear regression which means there is no overfitting or under fitting. Therefore, our best model for regression would be linear regression. The Ridge Regression model sets lambda to 0, which implies that it is actually an Ordinary Least Squares model, and the Lasso Regression model sets lambda to a value very close to 0, indicating that all features are important in predicting city development index. For this reason, we would recommend using a Linear Regression model, but also conducting research to identify additional features such as GDP, income of employees, population of the cities, etc to improve the prediction of the city development index. 
 
-We created a train dataset based on the target variable "city_development_index" to see which variable would impact "city_development_index" the most. We included the following four features (most important featurs from our classification models) in our new train and test data : "experience", "enrolled_university_enrollment", "last_new_job", and "major_disciplineStem''. By picking linear regression as our best model, we can easily see that "experience", "enrolled_university_enrollment", and "last_new_job" have positive relationships with the "city_development_index". And as "enrolled_university_enrollment" increases, the target variable "city_development_index" increases more compared with the other two variables which all have a positive relationship with "city_development_index". "major_disciplineStem '' has a negative relationship on the city development index. 
+We created a train dataset based on the target variable "city_development_index" to see which variable would impact "city_development_index" the most. We included the following four features (most important featurs from our classification models) in our new train and test data : "experience", "enrolled_university_enrollment", "last_new_job", and "major_disciplineStem''. By picking linear regression as our best model, we can easily see that "experience", "enrolled_university_enrollment", and "last_new_job" have positive relationships with the "city_development_index". And as "enrolled_university_enrollment" increases, the target variable "city_development_index" increases more compared with the other two variables which all have a positive relationship with "city_development_index". 
 
-Therefore, when the company wants to predict the probability of a candidate continuing to work in the same company, it should first place emphasis on the "city_development_index", followed by "enrolled_university_enrollment", "experience", and "last_new_job". The company should invest more on training candidate from cities with higher development index, university enrollments and work experience because as the number becomes higher, they are more likely to stay in the company after training. In this way, the company will save costs and time spent on training employees who want to leave the firm.
+*** 
 
+### Recommendations
+
+Candidates who are more likely to accept the job offer include those who:
+
+- Reside in low developed cities 
+- Have a discipline in STEM
+- Do not have any degree from universities (candidates with no formal undergraduate or graduate degrees might be more willing to receive work experience)
+
+*** 
+
+### Challenges Faced
+
+- Imputation of values while cleaning data (examples include changing values with: greater than 20 years of experience as 21, less than 1 year of experience as 0)
+- Regression variables used in the model might not be the only variables that are good predictors of the city development index. Unknown variables such as GDP, income and population levels might be better indicators
+
+*** 
+
+### Future Work
+
+- Additional research on variables that might be better predictors of city development index
+- Checking if dimensionality reduction techniques are required to account for highly correlated variables
