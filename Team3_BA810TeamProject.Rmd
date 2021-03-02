@@ -1,5 +1,5 @@
 ---
-title: "HR Analytics: Prediction of Candidates Who Stay/Leave the Company and the City Development Index"
+title: "HR Analytics: Prediction of Candidates Who Accept or Reject the Company Offer and the City Development Index"
 author: "Team 3: Xinping Yu, Ruchika Venkateswaran, Yigit Demiralp, Bosoo Kim, Muyan Xie"
 date: "3/1/2021"
 output:
@@ -14,7 +14,7 @@ knitr::opts_chunk$set(echo = TRUE)
 # BA810 Team Project
 
 ## Introduction and Motivation
-The dataset chosen by our group will be used in the field of "Human Resource Analytics".Our primary goal is to utilize the dataset to predict whether a candidate training for a data science position will accept or reject a full time offer from the company. The dataset has been compiled by a data-related company that is aiming to reduce the time and cost spent by the human resources division to rain candidates who are potential full time employees. In addition, we will also discuss how these factors impact a candidate's decision to stay and which is the most significant factor. We will also be using the most important features to predict the city development index. Generally, cities that are more developed provide a fertile ground for the development of science, technology, culture, and innovation. The prediction of the city development index can provide HR teams with deeper insight on whether they should train candidates who belong to cities with higher development indexes. 
+The dataset chosen by our group will be used in the field of "Human Resource Analytics".Our primary goal is to utilize the dataset to predict whether a candidate training for a data science position will accept or reject a full time offer from the company. The dataset has been compiled by a data-related company that is aiming to reduce the time and cost spent by the human resources division to rain candidates who are potential full time employees. In addition, we will also discuss how these factors impact a candidate's decision to accept the offer and which is the most significant factor. We will also be using the most important features to predict the city development index. Generally, cities that are more developed provide a fertile ground for the development of science, technology, culture, and innovation. The prediction of the city development index can provide HR teams with deeper insight on whether they should train candidates who belong to cities with higher or lower development indexes. 
 
 ## Impact of the Predictions
 Enhanced candidate experience
@@ -298,7 +298,7 @@ ggplot(data = df, mapping = aes(x = city_development_index)) +
 ```{r}
 ##city development index
 ggplot(df, aes(city_development_index, fill = as.factor(target)))+
-  geom_density(alpha = 0.5)+ ggtitle('Density Plot for City Development Index by Candidates who Stay/Leave the Company') + ylab('Density') + xlab('City Development Index')
+  geom_density(alpha = 0.5)+ ggtitle('Density Plot for City Development Index by Candidates who Accept/Reject the Offer') + ylab('Density') + xlab('City Development Index')
 ```
 
 ### Education, Discpline Major and University Enrollments
@@ -379,14 +379,13 @@ ggplot(data = df) +
 #gender count by company type
 ggplot(data = df) + geom_bar(mapping = aes(x = company_type, fill = gender)) + ggtitle('Number of Candidates in Each Company Type by Gender') + ylab('Number of Candidates') + xlab('Company Type')
 ```
-Most of
 ```{r}
 df %>% 
   group_by(company_size) %>% 
   count(target) %>% 
   ggplot(aes(reorder(company_size, n), n, fill = target))+
   geom_col()+
-  coord_flip() + ggtitle('Number of Candidates Who Stay/Leave by Company Size') + ylab('Company Size') + xlab('Number of Candidates')
+  coord_flip() + ggtitle('Number of Candidates Who Accept or Reject Job Offers based on Company Size') + ylab('Company Size') + xlab('Number of Candidates')
 
 ``` 
 
@@ -405,6 +404,7 @@ ggplot(data = df) +
     fun.max = max,
     fun = median
   )+ ggtitle('Summary Statistics by Company Type') + ylab('Training Hours') + xlab('Company Type')
+```
 
 ```{r}
 #experience regarding target
@@ -414,6 +414,7 @@ ggplot(data = df) +
   ylab("Experience") +
   xlab("No change job vs will change job")
 ```
+
 
 
 ```{r}
@@ -431,7 +432,7 @@ ggplot(df, aes(x=gender, y=training_hours, fill=gender)) + geom_boxplot() + ggti
 
 ## Machine Learning (Model Building)
 
-## Classification Models to Predict Whether Candidates Will Stay or Leave the Company 
+## Classification Models to Predict Whether Candidates Will Accept or Reject the Offer 
 ```{r}
 # Drop dummy variable
 dmy <- dummyVars(" ~ .", data = df, fullRank = T)
@@ -581,7 +582,6 @@ print(cm)
 ```
 
 
-
 ## Regression Models to Predict City Development Index 
 For our regression model, we are only using experience, no university enrollments, last new job and STEM discipline variables to predict the city development index. This can be attributed to the variable importance results in our classification models that display these 4 features as the most important features across all classification models above. 
 ```{r}
@@ -680,7 +680,7 @@ Both train and test MSE showed similar values for all linear, lasso, and ridge m
 * Ridge: 0.01177169 / 0.01170527
 
 #### Lambda & R-square: 
-The values of lambda and R-squares are very small (lambda is close to zero). Since the lambda value for both Lasso and Ridge regression is very small, we can conclude that the coefficients are not shrunk to a great extent and Since R square is very small, we can conclude that the coefficients are not shrunk to a great extent and all 4 features are important in predicting the city development index. However, we would have to re-engineer our features/conduct more research on identifying other features such as GDP, population, income levels, etc in order to improve the fit of our model (increase R square): 
+The values of lambda and R-squares are very small (lambda is close to zero) for Ridge regression. Since the value is very small, we can conclude that the coefficients are not shrunk to a great extent and since R square is very small, we can conclude that all 4 features are important in predicting the city development index.The value of lambda in Lasso Regression that produces the lowest RMSE is 0.9. This value is higher than that of Ridge regression and only selects a subset of predictors (experience, last new job and no university enrollment) as predictors of city development index. However, we would have to re-engineer our features/conduct more research on identifying other features such as GDP, population, income levels, etc in order to improve the fit of our model (increase R square): 
 * Linear: R^2 (0.1304)
 * Lasso: Lambda (0e+00), R^2(0.1299193)
 * Ridge: Lambda (0.1), R^2(0.1102777)
@@ -689,15 +689,15 @@ The values of lambda and R-squares are very small (lambda is close to zero). Sin
 
 ## Conclusion
 
-### Chosen Model for Predicting Whether Candidates Will Stay or Leave the Company (Classification)
+### Chosen Model for Predicting Whether Candidates Will Accept or Reject the Offer (Classification)
 The criteria for us to make the choice of the model depends on multiple aspects of the result. In the evaluation process, we considered not only the accuracy, but also the sensitivity, specificity, and balanced accuracy. Finally, we picked the Gradient boosting model as it is the best model with highest accuracy. All the models we have run including decision tree, random forest, and Gradient boost have close accuracy (all around 86 percent). We next try to compare the sensitivity and specificity and find that the Gradient boosting model has better sensitivity as compared to the remaining 3 models. Our test dataset has 1795 observations, with a 90% accuracy of prediction of the target value 0, i.e. prediction of candidates not looking for any job change. The Gradient boosting model shows its advantage on sensitivity (57 percent) which means it has fewer false negative predictions. It has predicted more correct values of candidates looking for job change (158 over 275) as compared to other models and therefore, we have picked the Gradient boost model.
 
-The variable importance and tree plots display that city development index is the most important feature across all models in predicting whether candidates will accept or reject the job, followed by years of experience. This implies that companies should also consider the city development index when predicting whether candidates will stay or leave the company. In our exploratory data analysis, we noticed that candidates belonging to more developed cities tend to reject job offers. Therefore, we find that it would be relevant to also use the most important variables to predict the city development index, which would help companies in guaging how much to invest in their employees. A higher development index and higher levels of work experience indicates that candidates will tend to reject the offer. This also helps companies to make the prediction for the cost of human force in the future.
+The variable importance and tree plots display that city development index is the most important feature across all models in predicting whether candidates will accept or reject the job, followed by years of experience. This implies that companies should also consider the city development index when predicting whether candidates will accept or reject the offer. In our exploratory data analysis, we noticed that candidates belonging to more developed cities tend to reject job offers. Therefore, we find that it would be relevant to also use the most important variables to predict the city development index, which would help companies in guaging how much to invest in their employees. A higher development index and higher levels of work experience indicates that candidates will tend to reject the offer. This also helps companies to make the prediction for the cost of human force in the future.
 
 ### Chosen Model for Predicting the City Development Index (Regression)
 After we run three classification models, we find out that "city_development_index" has the highest impact on our target variable. Which means that a candidate with a high "city_development_index" value would be more likely to reject the offer.
 
-We pick the best model on three values which are MSE/RMSE, MAE, and R^2. After fitting test data into Lasso, Ridge and Linear regression models, we pick linear regression as the best model. Linear regression gives us MSE with 0.01170526 which is the lowest and small MSE indicates a better model on unseen data. The residual standard error is 0.1085 and the R^2 is 0.1304 which is the highest. R^2 was based on correlation between actual and predicted value, as the value near 1 which indicates a better model. Also, MSE for both train and test are very close for Linear regression which means there is no overfitting or under fitting. Therefore, our best model for regression would be linear regression. The Ridge Regression model sets lambda to 0, which implies that it is actually an Ordinary Least Squares model, and the Lasso Regression model sets lambda to a value very close to 0, indicating that all features are important in predicting city development index. For this reason, we would recommend using a Linear Regression model, but also conducting research to identify additional features such as GDP, income of employees, population of the cities, etc to improve the prediction of the city development index. 
+We pick the best model on three values which are MSE/RMSE, MAE, and R^2. After fitting test data into Lasso, Ridge and Linear regression models, we pick linear regression as the best model. Linear regression gives us MSE with 0.01170526 which is the lowest and small MSE indicates a better model on unseen data. The residual standard error is 0.1085 and the R^2 is 0.1304 which is the highest. R^2 was based on correlation between actual and predicted value, as the value near 1 which indicates a better model. Also, MSE for both train and test are very close for Linear regression which means there is no overfitting or under fitting. Therefore, our best model for regression would be linear regression. For this reason, we would recommend using a Linear Regression model, but also conducting research to identify additional features such as GDP, income of employees, population of the cities, etc to improve the prediction of the city development index. 
 
 We created a train dataset based on the target variable "city_development_index" to see which variable would impact "city_development_index" the most. We included the following four features (most important featurs from our classification models) in our new train and test data : "experience", "enrolled_university_enrollment", "last_new_job", and "major_disciplineStem''. By picking linear regression as our best model, we can easily see that "experience", "enrolled_university_enrollment", and "last_new_job" have positive relationships with the "city_development_index". And as "enrolled_university_enrollment" increases, the target variable "city_development_index" increases more compared with the other two variables which all have a positive relationship with "city_development_index". 
 
@@ -708,19 +708,19 @@ We created a train dataset based on the target variable "city_development_index"
 Candidates who are more likely to accept the job offer include those who:
 
 - Reside in low developed cities 
-- Have a discipline in STEM
+- Do not have too much work experience
 - Do not have any degree from universities (candidates with no formal undergraduate or graduate degrees might be more willing to receive work experience)
 
 *** 
 
 ### Challenges Faced
 
+- Low sensitivity rate: Not the best at predicting candidates who are going to be accepting job offers
 - Imputation of values while cleaning data (examples include changing values with: greater than 20 years of experience as 21, less than 1 year of experience as 0)
-- Regression variables used in the model might not be the only variables that are good predictors of the city development index. Unknown variables such as GDP, income and population levels might be better indicators
 
 *** 
 
 ### Future Work
 
-- Additional research on variables that might be better predictors of city development index
+- Regression variables used in the model might not be the only variables that are good predictors of the city development index. Unknown variables such as GDP, income and population levels might be better indicators
 - Checking if dimensionality reduction techniques are required to account for highly correlated variables
